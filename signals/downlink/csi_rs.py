@@ -1,8 +1,7 @@
 import math
 from typing import List, Tuple, Union
 
-from renderer import NrSignalsCommon, ResourceGridFragment, T_PRB, T_SUBCARRIER
-from signals import SignalId
+from renderer import NrSignalsCommon, ResourceGridFragment, T_PRB, T_SUBCARRIER, SignalId
 
 __all__ = ['ChannelStateIndicatorRs']
 
@@ -18,14 +17,6 @@ class ChannelStateIndicatorRsConf:
         self.l_add = l_add
         self.cdm_group = cdm_group
 
-
-CDM_GROUP_PATTERN = {
-    # pattern: (td, fd, port)
-    'noCDM': (1, 1, 1),
-    'fd-CDM2': (1, 2, 2),
-    'cdm4-FD2-TD2': (2, 2, 4),
-    'cdm8-FD2-TD4': (4, 2, 8),
-}
 
 CSI_RS_LOCATIONS = {
     # see TS 38.211 Table 7.4.1.5.3-1 CSI-RS locations within a slot
@@ -51,7 +42,7 @@ CSI_RS_LOCATIONS = {
 
 
 class ChannelStateIndicatorRs(NrSignalsCommon):
-    def __init__(self, conf: int, slot: int, freq_positions: str, start_prb: int, num_of_prbs: int, density: float, sym1: int, *, sym2: int = -1, zero_powered: bool = False,
+    def __init__(self, conf: int, slot: int, freq_positions: str, start_prb: int, bandwidth: int, density: float, sym1: int, *, sym2: int = -1, zero_powered: bool = False,
                  odd_prb: bool = False, trs: bool = False):
         """
         Channel State Indication Reference Signal in NR downlink PHY
@@ -59,7 +50,7 @@ class ChannelStateIndicatorRs(NrSignalsCommon):
         :param slot: which slot to render
         :param freq_positions: bitmap for offset in PRB
         :param start_prb: start PRB of CSI-RS
-        :param num_of_prbs: the bandwith of CSI-RS
+        :param bandwidth: the bandwith in prbs of CSI-RS
         :param density: must be one of (0.5, 1, 3), density of CSI-RS in full bandwidth
         :param sym1: the 1st symbol for CSI-RS occuration
         :param sym2: (optional)the 2nd symbol for CSI-RS occuration, for configration row 13, 14, 16, 17, 18
@@ -73,7 +64,7 @@ class ChannelStateIndicatorRs(NrSignalsCommon):
         self.sym1 = sym1
         self.sym2 = sym2
         self.start_prb = start_prb
-        self.num_of_prbs = num_of_prbs
+        self.num_of_prbs = bandwidth
         self.density = density
         self.even_or_odd = 1 if odd_prb else 0
         self.zero_powered = zero_powered
@@ -98,7 +89,7 @@ class ChannelStateIndicatorRs(NrSignalsCommon):
     def _get_available_prbs(self) -> T_PRB:
         return tuple(range(self.start_prb, self.start_prb + self.num_of_prbs))
 
-    def _get_symbols_in_slot(self) -> List[int]:
+    def _get_symbols_in_slot(self) -> T_SUBCARRIER:
         ret = [self.sym1, self.sym1 + 1, self.sym2, self.sym2 + 1]
 
         if self.conf.num_of_l == 2:

@@ -16,7 +16,9 @@ class SignalId(IntEnum):
     # 0x10xx for Downlink Channels
     PBCH = 0x1001,
     PDCCH = 0x1002,
-    PDSCH = 0x1003,
+    PDCCH_Unused = 0x1003,
+    PDSCH = 0x1004,
+    PDSCH_Unused = 0x1005,
 
     # 0x11xx for Downlink Reference Signals
     PSS = 0x1101,
